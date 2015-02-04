@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit bootstrap="./tests/bootstrap.php"
+         backupGlobals="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         stopOnFailure="false"
+        >
+    <php>
+        <ini name="memory_limit" value="-1"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+    </php>
+
+    <testsuites>
+        <testsuite>
+            <directory>./tests/</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <blacklist>
+            <file>./src/ModelException.php</file>
+            <file>./src/ComponentsInterface.php</file>
+            <file>./src/Arrayable.php</file>
+            <file>./src/ActionFilter.php</file>
+            <file>./src/Behavior.php</file>
+            <file>./src/ComponentsTrait.php</file>
+            <file>./src/ModelEvent.php</file>
+        </blacklist>
+    </filter>
+    <logging>
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+    </logging>
+</phpunit>
