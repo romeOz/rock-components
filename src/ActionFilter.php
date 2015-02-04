@@ -4,6 +4,7 @@ namespace rock\components;
 
 
 use rock\core\Controller;
+use rock\helpers\Helper;
 
 class ActionFilter extends Behavior
 {
@@ -23,6 +24,31 @@ class ActionFilter extends Behavior
      * @see only
      */
     public $except = [];
+    /**
+     * ```php
+     * [[new Object, 'method'], $args]
+     * [['Object', 'staticMethod'], $args]
+     * [callback, $args]
+     * ```
+     *
+     * function(array params, Access $access){}
+     *
+     * @var array
+     */
+    public $success;
+    /**
+     * ```php
+     * [[new Object, 'method'], $args]
+     * [['Object', 'staticMethod'], $args]
+     * [callback, $args]
+     * ```
+     *
+     * function(array params, Access $access){}
+     *
+     * @var array
+     */
+    public $fail;
+    public $data;
     protected $event;
 
     public function events()
@@ -73,13 +99,15 @@ class ActionFilter extends Behavior
             // call afterFilter only if beforeFilter succeeds
             // beforeFilter and afterFilter should be properly nested
             $this->owner->on(Controller::EVENT_AFTER_ACTION, [$this, 'afterFilter'], null, false);
+            $this->callback($this->success);
         } else {
             $this->event->handled = true;
+            $this->callback($this->fail);
         }
     }
 
     /**
-     * @param \rock\event\\rock\core\ActionEvent $event
+     * @param \rock\core\ActionEvent $event
      */
     public function afterFilter($event)
     {
@@ -120,5 +148,20 @@ class ActionFilter extends Behavior
     protected function isActive($action)
     {
         return !in_array($action, $this->except, true) && (empty($this->only) || in_array($action, $this->only, true));
+    }
+
+    protected function callback($handler)
+    {
+        if (!isset($handler)) {
+            return;
+        }
+
+        if ($handler instanceof \Closure) {
+            $handler = [$handler];
+        }
+        $handler[1] = Helper::getValue($handler[1], [], true);
+        list($function, $data) = $handler;
+        $this->data = $data;
+        call_user_func($function, $this);
     }
 } 
