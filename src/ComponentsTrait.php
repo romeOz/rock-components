@@ -43,12 +43,20 @@ trait ComponentsTrait
      * will be detached first.
      * @param string|array|Behavior $behavior the behavior to be attached
      * @return Behavior the attached behavior.
+     * @throws BaseException
      */
     private function _attachBehaviorInternal($name, $behavior)
     {
         if (!($behavior instanceof Behavior)) {
             /** @var Behavior $behavior */
-            $behavior = Container::load($behavior);
+
+            if (class_exists('\rock\di\Container')) {
+                $behavior = Container::load($behavior);
+            } elseif (class_exists($behavior)) {
+                $behavior = new $behavior;
+            } else {
+                throw new BaseException(BaseException::UNKNOWN_CLASS, ['class' => $behavior]);
+            }
         }
         if (is_int($name)) {
             $behavior->attach($this);
@@ -98,7 +106,16 @@ trait ComponentsTrait
         } elseif (strncmp($name, 'as ', 3) === 0) {
             // as behavior: attach behavior
             $name = trim(substr($name, 3));
-            $this->attachBehavior($name, $value instanceof Behavior ? $value : Container::load($value));
+            if ($value instanceof Behavior) {
+                $behavior = $value;
+            } elseif (class_exists('\rock\di\Container')) {
+                $behavior = Container::load($value);
+            } elseif (class_exists($value)) {
+                $behavior = new $value;
+            } else {
+                throw new BaseException(BaseException::UNKNOWN_CLASS, ['class' => $value]);
+            }
+            $this->attachBehavior($name, $behavior);
 
             return;
         } else {
