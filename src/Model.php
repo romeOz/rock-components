@@ -91,7 +91,12 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 return;
             }
             if (class_exists('\rock\template\Template')) {
-                $this->_template = new \rock\template\Template;
+                $config = [];
+                if (is_array($this->_template)) {
+                    $config = $this->_template;
+                    unset($config['class']);
+                }
+                $this->_template = new \rock\template\Template($config);
             }
         }
     }
