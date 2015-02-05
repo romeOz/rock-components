@@ -24,7 +24,6 @@
             <file>./src/ModelException.php</file>
             <file>./src/ComponentsInterface.php</file>
             <file>./src/Arrayable.php</file>
-            <file>./src/ActionFilter.php</file>
             <file>./src/Behavior.php</file>
             <file>./src/ComponentsTrait.php</file>
             <file>./src/ModelEvent.php</file>
