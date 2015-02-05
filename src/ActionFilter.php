@@ -25,25 +25,25 @@ class ActionFilter extends Behavior
      */
     public $except = [];
     /**
+     * Success as callable, when using filter.
+     *
      * ```php
      * [[new Object, 'method'], $args]
      * [['Object', 'staticMethod'], $args]
      * [callback, $args]
      * ```
-     *
-     * function(array params, Access $access){}
      *
      * @var array
      */
     public $success;
     /**
+     * Fail as callable, when using filter.
+     *
      * ```php
      * [[new Object, 'method'], $args]
      * [['Object', 'staticMethod'], $args]
      * [callback, $args]
      * ```
-     *
-     * function(array params, Access $access){}
      *
      * @var array
      */
