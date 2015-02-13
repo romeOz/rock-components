@@ -4,6 +4,7 @@ namespace rock\components;
 use rock\base\BaseException;
 use rock\di\Container;
 use rock\events\EventsTrait;
+use rock\helpers\Instance;
 
 trait ComponentsTrait
 {
@@ -49,14 +50,7 @@ trait ComponentsTrait
     {
         if (!($behavior instanceof Behavior)) {
             /** @var Behavior $behavior */
-
-            if (class_exists('\rock\di\Container')) {
-                $behavior = Container::load($behavior);
-            } elseif (class_exists($behavior)) {
-                $behavior = new $behavior;
-            } else {
-                throw new BaseException(BaseException::UNKNOWN_CLASS, ['class' => $behavior]);
-            }
+            $behavior = Instance::ensure($behavior);
         }
         if (is_int($name)) {
             $behavior->attach($this);
