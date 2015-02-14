@@ -75,18 +75,12 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      */
     protected $_errors = [];
     protected $useLabelsAsPlaceholders = true;
-    /** @var  Template|string|array */
-    protected $_template = 'template';
+    /** @var  Template */
+    protected $_template;
     /** @var ActiveValidate|string|array  */
     protected $_validate = 'activeValidate';
     /** @var Sanitize|string|array  */
     protected $_sanitize = 'sanitize';
-
-    public function init()
-    {
-        $this->_template = Instance::ensure($this->_template, '\rock\template\Template', false);
-    }
-
 
     /**
      * Returns the validation rules for attributes.
@@ -822,6 +816,15 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     public function offsetUnset($offset)
     {
         $this->$offset = null;
+    }
+
+    /**
+     * Set instance {@see \rock\template\Template}.
+     * @param Template $template
+     */
+    public function setTemplate(Template $template)
+    {
+        $this->_template = $template;
     }
 
     protected function error($msg, $placeholder = null)
