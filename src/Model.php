@@ -1,10 +1,9 @@
 <?php
 namespace rock\components;
 
-use rock\di\Container;
 use rock\helpers\Inflector;
+use rock\helpers\Instance;
 use rock\helpers\StringHelper;
-use rock\i18n\i18n;
 use rock\sanitize\Sanitize;
 use rock\template\Template;
 use rock\validate\ActiveValidate;
@@ -85,20 +84,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
 
     public function init()
     {
-        if (!is_object($this->_template)) {
-            if (class_exists('\rock\di\Container')) {
-                $this->_template = Container::load($this->_template);
-                return;
-            }
-            if (class_exists('\rock\template\Template')) {
-                $config = [];
-                if (is_array($this->_template)) {
-                    $config = $this->_template;
-                    unset($config['class']);
-                }
-                $this->_template = new \rock\template\Template($config);
-            }
-        }
+        $this->_template = Instance::ensure($this->_template, '\rock\template\Template', false);
     }
 
 
@@ -552,7 +538,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
         }
         $this->_errors[$placeholderName][] = $error;
         if (isset($this->_template)) {
-            $this->_template->addPlaceholder($placeholderName, [$error], true);
+            $this->_template->addPlaceholder('$root.'.$placeholderName, [$error]);
         }
     }
 
@@ -844,7 +830,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
             $placeholder = 'e_' . $this->formName();
         }
         if (isset($this->_template)) {
-            $this->_template->addPlaceholder($placeholder, $msg, true);
+            $this->_template->addPlaceholder('$root.'.$placeholder, $msg);
         }
     }
 
@@ -912,8 +898,8 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     $attributes[$name] = call_user_func_array([$this, $rule], $args);
                     continue;
                 }
-
-                $sanitize = $this->_getSanitize();
+                /** @var \rock\sanitize\Sanitize $sanitize */
+                $sanitize = Instance::ensure($this->_sanitize, '\rock\sanitize\Sanitize');
                 // function
                 if (function_exists($rule) && (!$sanitize || !$sanitize->existsRule($rule))) {
                     array_unshift($args, $attributes[$name]);
@@ -984,7 +970,8 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     continue;
                 }
 
-                $validate = $this->_getValiadte();
+                /** @var \rock\validate\ActiveValidate $validate */
+                $validate = Instance::ensure($this->_validate, '\rock\validate\ActiveValidate');
 
                 // function
                 if (function_exists($ruleName) && (!$validate || !$validate->existsRule($ruleName))) {
@@ -1086,49 +1073,5 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
             return false;
         }
         return true;
-    }
-
-    /**
-     * @return ActiveValidate|null
-     */
-    private function _getValiadte()
-    {
-        if (!is_object($this->_validate)) {
-            if (class_exists('\rock\di\Container')) {
-                return Container::load($this->_validate);
-            }
-
-            if (class_exists('\rock\validate\ActiveValidate')) {
-                $config = [];
-                if (is_array($this->_validate)) {
-                    $config = $this->_validate;
-                    unset($config['class']);
-                }
-                return new ActiveValidate($config);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @return Sanitize|null
-     */
-    private function _getSanitize()
-    {
-        if (!is_object($this->_validate)) {
-            if (class_exists('\rock\di\Container')) {
-                return Container::load($this->_sanitize);
-            }
-
-            if (class_exists('\rock\sanitize\Sanitize')) {
-                $config = [];
-                if (is_array($this->_sanitize)) {
-                    $config = $this->_sanitize;
-                    unset($config['class']);
-                }
-                return new Sanitize($config);
-            }
-        }
-        return null;
     }
 }
