@@ -902,7 +902,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     continue;
                 }
                 /** @var \rock\sanitize\Sanitize $sanitize */
-                $sanitize = Instance::ensure($this->_sanitize, '\rock\sanitize\Sanitize');
+                $sanitize = Instance::ensure($this->_sanitize, '\rock\sanitize\Sanitize', false);
                 // function
                 if (function_exists($rule) && (!$sanitize || !$sanitize->existsRule($rule))) {
                     array_unshift($args, $attributes[$name]);
@@ -974,7 +974,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 }
 
                 /** @var \rock\validate\ActiveValidate $validate */
-                $validate = Instance::ensure($this->_validate, '\rock\validate\ActiveValidate');
+                $validate = Instance::ensure($this->_validate, '\rock\validate\ActiveValidate', false);
 
                 // function
                 if (function_exists($ruleName) && (!$validate || !$validate->existsRule($ruleName))) {
