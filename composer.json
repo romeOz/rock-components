@@ -17,13 +17,12 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "romeoz/rock-base" : "*@dev",
-        "romeoz/rock-helpers" : "*@dev",
-        "romeoz/rock-events" : "*@dev"
+        "romeoz/rock-helpers" : "0.10.*",
+        "romeoz/rock-events" : "0.10.*"
     },
     "require-dev": {
-        "romeoz/rock-sanitize" : "*@dev",
-        "romeoz/rock-validate" : "*@dev",
+        "romeoz/rock-sanitize" : "0.10.*",
+        "romeoz/rock-validate" : "0.10.*",
         "phpunit/phpunit": "4.4.*"
     },
     "autoload": {
@@ -33,7 +32,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "0.9-dev"
+            "dev-master": "0.10-dev"
         }
     }
 }
