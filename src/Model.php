@@ -607,7 +607,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      */
     public function onUnsafeAttribute($name, $value)
     {
-//        if (DEBUG) {
+//        if (ROCK_DEBUG) {
 //            Rock::trace(__METHOD__, "Failed to set unsafe attribute '$name' in '" . get_class($this) . "'.");
 //        }
     }
