@@ -460,9 +460,9 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
             return [];
         } else {
             $errors = [];
-            foreach ($this->_errors as $attributeErrors) {
+            foreach ($this->_errors as $name => $attributeErrors) {
                 if (current($attributeErrors)) {
-                    $errors[] = current($attributeErrors);
+                    $errors[$name] = current($attributeErrors);
                 }
             }
         }
@@ -607,7 +607,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      */
     public function onUnsafeAttribute($name, $value)
     {
-//        if (ROCK_DEBUG) {
+//        if (DEBUG) {
 //            Rock::trace(__METHOD__, "Failed to set unsafe attribute '$name' in '" . get_class($this) . "'.");
 //        }
     }
