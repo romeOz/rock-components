@@ -2,6 +2,7 @@
 namespace rock\components;
 
 use rock\helpers\ArrayHelper;
+use rock\helpers\Link;
 use rock\helpers\ObjectHelper;
 
 /**
@@ -112,9 +113,9 @@ trait ArrayableTrait
             $data[$field] = is_string($definition) ? $this->$definition : call_user_func($definition, $field, $this);
         }
 
-//        if ($this instanceof Linkable) {
-//            $data['_links'] = Link::serialize($this->getLinks());
-//        }
+        if ($this instanceof Linkable) {
+            $data['_links'] = Link::serialize($this->getLinks());
+        }
 
         return $recursive ? static::convert($data) : $data;
     }
