@@ -23,7 +23,7 @@
     "require-dev": {
         "romeoz/rock-sanitize" : "0.10.*",
         "romeoz/rock-validate" : "0.10.*",
-        "phpunit/phpunit": "4.4.*"
+        "phpunit/phpunit": "4.6.*"
     },
     "autoload": {
         "psr-4": {
