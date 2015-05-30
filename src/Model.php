@@ -635,6 +635,17 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
         return $this->attributes();
     }
 
+    protected $isLoad = false;
+
+    /**
+     * Check is load data.
+     * @return bool
+     */
+    public function isLoad()
+    {
+        return $this->isLoad;
+    }
+
     /**
      * Populates the model with the data from end user.
      *
@@ -650,12 +661,12 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
         $scope = $this->formName();
         if ($scope == '') {
             $this->setAttributes($data);
-            return true;
+            return $this->isLoad = true;
         } elseif (isset($data[$scope])) {
             $this->setAttributes($data[$scope]);
-            return true;
+            return $this->isLoad = true;
         } else {
-            return false;
+            return $this->isLoad = false;
         }
     }
 
