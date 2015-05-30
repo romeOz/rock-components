@@ -587,9 +587,9 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      */
     public function setAttributes(array $values, $safeOnly = true)
     {
-        $attributes = array_flip($safeOnly ? $this->safeAttributes() : $this->attributes());
+        $attributeNames = array_flip($safeOnly ? $this->safeAttributes() : $this->attributes());
         foreach ($values as $name => $value) {
-            if (isset($attributes[$name])) {
+            if (isset($attributeNames[$name])) {
                 $this->$name = $value;
             } elseif ($safeOnly) {
                 $this->onUnsafeAttribute($name, $value);
