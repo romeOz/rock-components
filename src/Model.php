@@ -5,7 +5,6 @@ use rock\helpers\Inflector;
 use rock\helpers\Instance;
 use rock\helpers\StringHelper;
 use rock\sanitize\Sanitize;
-use rock\template\Template;
 use rock\validate\ActiveValidate;
 
 /**
@@ -75,8 +74,6 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      */
     protected $_errors = [];
     protected $useLabelsAsPlaceholders = true;
-    /** @var  Template */
-    protected $_template;
     /** @var ActiveValidate|string|array  */
     protected $_validate = 'activeValidate';
     /** @var Sanitize|string|array  */
@@ -520,23 +517,6 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     }
 
     /**
-     * Adds a new error to the specified attribute.
-     *
-     * @param string $error     new error message
-     * @param string $placeholderName placeholder name
-     */
-    public function addErrorAsPlaceholder($error, $placeholderName = null)
-    {
-        if (empty($placeholderName)) {
-            $placeholderName = 'e_' . $this->formName();
-        }
-        $this->_errors[$placeholderName][] = $error;
-        if (isset($this->_template)) {
-            $this->_template->addPlaceholder('$root.'.$placeholderName, [$error]);
-        }
-    }
-
-    /**
      * Generates a user friendly attribute label based on the give attribute name.
      *
      * This is done by replacing underscores, dashes and dots with blanks and
@@ -827,25 +807,6 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     public function offsetUnset($offset)
     {
         $this->$offset = null;
-    }
-
-    /**
-     * Set instance {@see \rock\template\Template}.
-     * @param Template $template
-     */
-    public function setTemplate(Template $template)
-    {
-        $this->_template = $template;
-    }
-
-    protected function error($msg, $placeholder = null)
-    {
-        if (!isset($placeholder)) {
-            $placeholder = 'e_' . $this->formName();
-        }
-        if (isset($this->_template)) {
-            $this->_template->addPlaceholder('$root.'.$placeholder, $msg);
-        }
     }
 
     private function _rulesInternal(array $attributes)
