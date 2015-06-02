@@ -524,13 +524,24 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
         $this->_errors[$attribute][] = $error;
     }
 
-    public function addMultiErrors(array $errors)
+    /**
+     * Adds a list of errors.
+     * @param array $items a list of errors. The array keys must be attribute names.
+     * The array values should be error messages. If an attribute has multiple errors,
+     * these errors must be given in terms of an array.
+     * You may use the result of {@see \rock\components\Model::getErrors()} as the value for this parameter.
+     */
+    public function addErrors(array $items)
     {
-        if (empty($errors)) {
-            return;
+        foreach ($items as $attribute => $errors) {
+            if (is_array($errors)) {
+                foreach($errors as $error) {
+                    $this->addError($attribute, $error);
+                }
+            } else {
+                $this->addError($attribute, $errors);
+            }
         }
-
-        $this->_errors = array_merge($this->_errors, $errors);
     }
 
     /**
@@ -665,12 +676,14 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      * The data being populated is subject to the safety check by {@see \rock\components\Model::setAttributes()} .
      * @param array $data the data array. This is usually `$_POST` or `$_GET`, but can also be any valid array
      * supplied by end user.
+     * @param string $formName the form name to be used for loading the data into the model.
+     * If not set, {@see \rock\components\Model::formName()} will be used.
      * @return bool whether the model is successfully populated with some data.
      */
-    public function load($data)
+    public function load($data, $formName = null)
     {
-        $scope = $this->formName();
-        if ($scope == '') {
+        $scope = $formName === null ? $this->formName() : $formName;
+        if ($scope === '' && !empty($data)) {
             $this->setAttributes($data);
             return $this->isLoad = true;
         } elseif (isset($data[$scope])) {
@@ -692,29 +705,34 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      * @param array $models the models to be populated. Note that all models should have the same class.
      * @param array $data the data array. This is usually `$_POST` or `$_GET`, but can also be any valid array
      * supplied by end user.
+     * @param string $formName the form name to be used for loading the data into the models.
+     * If not set, it will use the {@see \rock\components\Model::formName()} value of the first model in `$models`.
      * @return bool whether the model is successfully populated with some data.
      */
-    public static function loadMultiple($models, $data)
+    public static function loadMultiple($models, $data, $formName = null)
     {
         /** @var Model $model */
-        $model = reset($models);
-        if ($model === false) {
-            return false;
+        if ($formName === null) {
+            /* @var $first Model */
+            $first = reset($models);
+            if ($first === false) {
+                return false;
+            }
+            $formName = $first->formName();
         }
         $success = false;
-        $scope = $model->formName();
         foreach ($models as $i => $model) {
-            if ($scope == '') {
-                if (isset($data[$i])) {
-                    $model->setAttributes($data[$i]);
+            /* @var $model Model */
+            if ($formName == '') {
+                if (!empty($data[$i])) {
+                    $model->load($data[$i], '');
                     $success = true;
                 }
-            } elseif (isset($data[$scope][$i])) {
-                $model->setAttributes($data[$scope][$i]);
+            } elseif (!empty($data[$formName][$i])) {
+                $model->load($data[$formName][$i], '');
                 $success = true;
             }
         }
-
         return $success;
     }
 

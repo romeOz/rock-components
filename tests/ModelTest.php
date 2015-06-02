@@ -4,6 +4,8 @@ namespace rockunit;
 use rock\base\ObjectInterface;
 use rock\base\ObjectTrait;
 use rock\components\Model;
+use rockunit\data\Singer;
+use rockunit\data\Speaker;
 
 /**
  * @group components
@@ -405,6 +407,110 @@ class ModelTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($model->isAttributeRequired('username'));
         $this->assertFalse($model->isAttributeRequired('age'));
+    }
+
+    public function testGetAttributeLabel()
+    {
+        $speaker = new Speaker();
+        $this->assertEquals('First Name', $speaker->getAttributeLabel('firstName'));
+        $this->assertEquals('This is the custom label', $speaker->getAttributeLabel('customLabel'));
+        $this->assertEquals('Underscore Style', $speaker->getAttributeLabel('underscore_style'));
+    }
+
+    public function testGetAttributes()
+    {
+        $speaker = new Speaker();
+        $speaker->firstName = 'Qiang';
+        $speaker->lastName = 'Xue';
+        $this->assertEquals([
+            'firstName' => 'Qiang',
+            'lastName' => 'Xue',
+            'customLabel' => null,
+            'underscore_style' => null,
+        ], $speaker->getAttributes());
+        $this->assertEquals([
+            'firstName' => 'Qiang',
+            'lastName' => 'Xue',
+        ], $speaker->getAttributes(['firstName', 'lastName']));
+        $this->assertEquals([
+            'firstName' => 'Qiang',
+            'lastName' => 'Xue',
+        ], $speaker->getAttributes([], ['customLabel', 'underscore_style']));
+        $this->assertEquals([
+            'firstName' => 'Qiang',
+        ], $speaker->getAttributes(['firstName', 'lastName'], ['lastName', 'customLabel', 'underscore_style']));
+    }
+
+    public function testErrors()
+    {
+        $speaker = new Speaker();
+        $this->assertEmpty($speaker->getErrors());
+        $this->assertEmpty($speaker->getErrors('firstName'));
+        $this->assertEmpty($speaker->getFirstErrors());
+        $this->assertFalse($speaker->hasErrors());
+        $this->assertFalse($speaker->hasErrors('firstName'));
+        $speaker->addError('firstName', 'Something is wrong!');
+        $this->assertEquals(['firstName' => ['Something is wrong!']], $speaker->getErrors());
+        $this->assertEquals(['Something is wrong!'], $speaker->getErrors('firstName'));
+        $speaker->addError('firstName', 'Totally wrong!');
+        $this->assertEquals(['firstName' => ['Something is wrong!', 'Totally wrong!']], $speaker->getErrors());
+        $this->assertEquals(['Something is wrong!', 'Totally wrong!'], $speaker->getErrors('firstName'));
+        $this->assertTrue($speaker->hasErrors());
+        $this->assertTrue($speaker->hasErrors('firstName'));
+        $this->assertFalse($speaker->hasErrors('lastName'));
+        $this->assertEquals(['firstName' => 'Something is wrong!'], $speaker->getFirstErrors());
+        $this->assertEquals('Something is wrong!', $speaker->getFirstError('firstName'));
+        $this->assertNull($speaker->getFirstError('lastName'));
+        $speaker->addError('lastName', 'Another one!');
+        $this->assertEquals([
+            'firstName' => [
+                'Something is wrong!',
+                'Totally wrong!',
+            ],
+            'lastName' => ['Another one!'],
+        ], $speaker->getErrors());
+        $speaker->clearErrors('firstName');
+        $this->assertEquals([
+            'lastName' => ['Another one!'],
+        ], $speaker->getErrors());
+        $speaker->clearErrors();
+        $this->assertEmpty($speaker->getErrors());
+        $this->assertFalse($speaker->hasErrors());
+    }
+    public function testAddErrors()
+    {
+        $singer = new Singer();
+        $errors = ['firstName' => ['Something is wrong!']];
+        $singer->addErrors($errors);
+        $this->assertEquals($singer->getErrors(), $errors);
+        $singer->clearErrors();
+        $singer->addErrors(['firstName' => 'Something is wrong!']);
+        $this->assertEquals($singer->getErrors(), ['firstName' => ['Something is wrong!']]);
+        $singer->clearErrors();
+        $errors = ['firstName' => ['Something is wrong!', 'Totally wrong!']];
+        $singer->addErrors($errors);
+        $this->assertEquals($singer->getErrors(), $errors);
+        $singer->clearErrors();
+        $errors = [
+            'firstName' => ['Something is wrong!'],
+            'lastName' => ['Another one!']
+        ];
+        $singer->addErrors($errors);
+        $this->assertEquals($singer->getErrors(), $errors);
+        $singer->clearErrors();
+        $errors = [
+            'firstName' => ['Something is wrong!', 'Totally wrong!'],
+            'lastName' => ['Another one!']
+        ];
+        $singer->addErrors($errors);
+        $this->assertEquals($singer->getErrors(), $errors);
+        $singer->clearErrors();
+        $errors = [
+            'firstName' => ['Something is wrong!', 'Totally wrong!'],
+            'lastName' => ['Another one!', 'Totally wrong!']
+        ];
+        $singer->addErrors($errors);
+        $this->assertEquals($singer->getErrors(), $errors);
     }
 }
 
