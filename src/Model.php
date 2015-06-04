@@ -2,10 +2,8 @@
 namespace rock\components;
 
 use rock\helpers\Inflector;
-use rock\helpers\Instance;
 use rock\helpers\StringHelper;
 use rock\sanitize\Sanitize;
-use rock\validate\ActiveValidate;
 
 /**
  * Model is the base class for data models.
@@ -74,10 +72,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      */
     protected $_errors = [];
     protected $useLabelsAsPlaceholders = true;
-    /** @var ActiveValidate|string|array  */
-    protected $_validate = 'activeValidate';
-    /** @var Sanitize|string|array  */
-    protected $_sanitize = 'sanitize';
+
 
     /**
      * Returns the validation rules for attributes.
@@ -922,8 +917,11 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     $attributes[$name] = call_user_func_array([$this, $rule], $args);
                     continue;
                 }
-                /** @var \rock\sanitize\Sanitize $sanitize */
-                $sanitize = Instance::ensure($this->_sanitize, '\rock\sanitize\Sanitize', false);
+                if (!class_exists('\rock\sanitize\Sanitize')) {
+                    throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Sanitize']);
+                }
+                $sanitize = new Sanitize;
+
                 // function
                 if (function_exists($rule) && (!$sanitize || !$sanitize->existsRule($rule))) {
                     array_unshift($args, $attributes[$name]);
@@ -994,8 +992,10 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     continue;
                 }
 
-                /** @var \rock\validate\ActiveValidate $validate */
-                $validate = Instance::ensure($this->_validate, '\rock\validate\ActiveValidate', false);
+                if (!class_exists('\rock\validate\Validate')) {
+                    throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Validate']);
+                }
+                $validate = new ModelValidate;
 
                 // function
                 if (function_exists($ruleName) && (!$validate || !$validate->existsRule($ruleName))) {
@@ -1079,7 +1079,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
         return true;
     }
 
-    private function _validateAsRule(ActiveValidate $validate, $name, $value, $ruleName, $args)
+    private function _validateAsRule(ModelValidate $validate, $name, $value, $ruleName, $args)
     {
         if ($validate->existsModelRule($ruleName)) {
             array_unshift($args, $this);

@@ -28,6 +28,7 @@
             <file>./src/ComponentsTrait.php</file>
             <file>./src/ModelEvent.php</file>
             <file>./src/Linkable.php</file>
+            <file>./src/ModelValidate.php</file>
         </blacklist>
     </filter>
     <logging>
