@@ -15,34 +15,24 @@ use rock\validate\Validate;
  */
 class ModelValidate extends Validate
 {
-    public function existsModelRule($name)
-    {
-        $rules = $this->modelRules();
-        return !empty($rules) && isset($rules[$name]);
-    }
+    /** @var  Model */
+    public $model;
+    /**
+     * Name of attribute.
+     * @var string
+     */
+    public $attribute;
 
-    protected function defaultRules()
+    /**
+     * @inheritdoc
+     */
+    protected function getInstanceRule($name, array $arguments)
     {
-        return array_merge(parent::defaultRules(), $this->modelRules());
-    }
-
-    protected function modelRules()
-    {
-        return [
-            'unique' => [
-                'class' => \rock\db\validate\rules\Unique::className(),
-                'locales' => [
-                    'en' => \rock\db\validate\locale\en\Unique::className(),
-                    'ru' => \rock\db\validate\locale\ru\Unique::className(),
-                ]
-            ],
-            'mongoId' => [
-                'class' => \rock\mongodb\validate\MongoIdRule::className(),
-                'locales' => [
-                    'en' => \rock\mongodb\validate\locale\en\MongoIdLocale::className(),
-                    'ru' => \rock\mongodb\validate\locale\ru\MongoIdLocale::className(),
-                ]
-            ],
-        ];
+        $rule = parent::getInstanceRule($name, $arguments);
+        if ($rule instanceof ModelRule) {
+            $rule->model = $this->model;
+            $rule->attribute = $this->attribute;
+        }
+        return $rule;
     }
 }
