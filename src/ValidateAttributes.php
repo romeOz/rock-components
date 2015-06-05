@@ -43,7 +43,6 @@ class ValidateAttributes
                 }
             }
             foreach ($rules as $key => $ruleName) {
-                $onlySanitize = false;
                 if ($key === 'placeholders' || $key === 'messages' || $key === 'one' || $key === 'when') {
                     continue;
                 }
@@ -60,14 +59,11 @@ class ValidateAttributes
                     $ruleName = $key;
                 }
 
-                if (is_string($ruleName) && $ruleName[0] === '!') {
-                    $ruleName = ltrim($ruleName, '!');
-                    $onlySanitize = true;
-                }
+                $onlySanitize = $this->isOnlySanitize($ruleName);
+
                 // closure
                 if ($ruleName instanceof \Closure) {
                     array_unshift($args, $name, $this->model->$name);
-
                     call_user_func_array(\Closure::bind($ruleName, $this->model), $args);
                     continue;
                 }
@@ -89,36 +85,14 @@ class ValidateAttributes
                 }
 
                 if (!$onlySanitize && $validate->existsRule($ruleName)) {
-                    if ($validate instanceof ModelValidate) {
-                        $validate->model = $this->model;
-                        $validate->attribute = $name;
-                    }
-
-                    // rule
-                    if ($placeholders) {
-                        $validate->placeholders($placeholders);
-                    }
-                    if ($messages) {
-                        $validate->messages($messages);
-                    }
-                    $validate = call_user_func_array([$validate, $ruleName], $args);
-                    if (!$validate->validate($this->model->$name)) {
-                        $this->model->addError($name, $validate->getFirstError());
-                    }
+                    $this->validateInternal($validate, $ruleName, $name, $args, $placeholders, $messages);
                 }
 
                 if ($this->model->hasErrors()) {
                     continue;
                 }
 
-                if ($sanitize->existsRule($ruleName)) {
-                    if ($sanitize instanceof ModelSanitize) {
-                        $sanitize->model = $this->model;
-                        $sanitize->attribute = $name;
-                    }
-
-                    $this->model->$name = call_user_func_array([$sanitize, $ruleName], $args)->sanitize($this->model->$name);
-                }
+                $this->sanitizeInternal($sanitize, $ruleName, $name, $args);
 
             }
             if (isset($rules['one'])) {
@@ -132,5 +106,51 @@ class ValidateAttributes
             return $this->validate($attributeNames, $rules['when']);
         }
         return true;
+    }
+
+    protected function validateInternal(Validate $validate, $ruleName, $attributeName, $args, $placeholders, $messages)
+    {
+        if ($validate instanceof ModelValidate) {
+            $validate->model = $this->model;
+            $validate->attribute = $attributeName;
+        }
+
+        // rule
+        if ($placeholders) {
+            $validate->placeholders($placeholders);
+        }
+        if ($messages) {
+            $validate->messages($messages);
+        }
+        $validate = call_user_func_array([$validate, $ruleName], $args);
+        if (!$validate->validate($this->model->$attributeName)) {
+            $this->model->addError($attributeName, $validate->getFirstError());
+        }
+    }
+
+    protected function sanitizeInternal(Sanitize $sanitize, $ruleName, $attributeName, $args)
+    {
+        if ($sanitize instanceof ModelSanitize) {
+            $sanitize->model = $this->model;
+            $sanitize->attribute = $attributeName;
+        }
+
+        if ($sanitize->existsRule($ruleName)) {
+            if ($sanitize instanceof ModelSanitize) {
+                $sanitize->model = $this->model;
+                $sanitize->attribute = $attributeName;
+            }
+
+            $this->model->$attributeName = call_user_func_array([$sanitize, $ruleName], $args)->sanitize($this->model->$attributeName);
+        }
+    }
+
+    protected function isOnlySanitize(&$ruleName)
+    {
+        if (is_string($ruleName) && $ruleName[0] === '!') {
+            $ruleName = ltrim($ruleName, '!');
+            return true;
+        }
+        return false;
     }
 }
