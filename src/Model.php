@@ -936,13 +936,9 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 }
 
                 // function
-                if (function_exists($rule) && (!$sanitize || !$sanitize->existsRule($rule))) {
+                if (function_exists($rule) && !$sanitize->existsRule($rule)) {
                     array_unshift($args, $attributes[$name]);
                     $attributes[$name] = call_user_func_array($rule, $args);
-                    continue;
-                }
-
-                if (!$sanitize) {
                     continue;
                 }
 
@@ -1016,7 +1012,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 }
 
                 // function
-                if (function_exists($ruleName) && (!$validate || !$validate->existsRule($ruleName))) {
+                if (function_exists($ruleName) && !$validate->existsRule($ruleName)) {
                     if ($attributes[$name] === '') {
                         continue;
                     }
@@ -1029,10 +1025,6 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     if (!$this->_validateAsFunction($name, $attributes[$name], $ruleName, $args, $message)) {
                         $valid = false;
                     }
-                    continue;
-                }
-
-                if (!$validate) {
                     continue;
                 }
 
