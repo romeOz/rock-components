@@ -1,7 +1,7 @@
 {
     "name": "romeoz/rock-components",
     "description": "Components module for Rock Framework",
-    "keywords": ["components", "behaviors", "filters"],
+    "keywords": ["common", "components", "behaviors", "filters"],
     "type": "library",
     "license": "MIT",
     "support": {
