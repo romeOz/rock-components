@@ -1,6 +1,8 @@
 <?php
 namespace rock\components;
 
+use rock\components\sanitize\ModelSanitize;
+use rock\components\validate\ModelValidate;
 use rock\helpers\Inflector;
 use rock\helpers\Instance;
 use rock\helpers\StringHelper;
@@ -926,9 +928,12 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 if (!class_exists('\rock\sanitize\Sanitize')) {
                     throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Sanitize']);
                 }
-
-                /** @var Sanitize $sanitize */
-                $sanitize = Instance::ensure($this->sanitize, Sanitize::className());
+                /** @var ModelSanitize $sanitize */
+                $sanitize = Instance::ensure($this->sanitize, ModelSanitize::className());
+                if ($sanitize instanceof ModelSanitize) {
+                    $sanitize->model = $this;
+                    $sanitize->attribute = $name;
+                }
 
                 // function
                 if (function_exists($rule) && (!$sanitize || !$sanitize->existsRule($rule))) {

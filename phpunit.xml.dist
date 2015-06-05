@@ -29,6 +29,7 @@
             <file>./src/ModelEvent.php</file>
             <file>./src/Linkable.php</file>
             <file>./src/ModelValidate.php</file>
+            <file>./src/ModelSanitize.php</file>
         </blacklist>
     </filter>
     <logging>

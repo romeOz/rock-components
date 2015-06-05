@@ -1,19 +1,19 @@
 <?php
 
-namespace rock\components;
+namespace rock\components\sanitize;
 
 
-use rock\validate\Validate;
+use rock\components\Model;
+use rock\sanitize\Sanitize;
 
 /**
- * Model validate.
+ * Model sanitize.
  *
- * @method static Validate unique(Model $m, $targetAttribute = null, $targetClass = null, $filter = null)
- * @method static Validate mongoId(Model $m)
+ * @method static Sanitize mongoId()
  *
  * @package rock\validate
  */
-class ModelValidate extends Validate
+class ModelSanitize extends Sanitize
 {
     /** @var  Model */
     public $model;
