@@ -72,16 +72,16 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_SANITIZE, ['email', 'username', 'age'], 'trim'
+                ['email', 'username', 'age'], 'trim'
             ],
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required'
+                ['email', 'username'], 'required'
             ],
             [
-                FooModal::RULE_SANITIZE, 'email', 'lowercase', 'removeTags'
+                'email', '!lowercase', 'removeTags'
             ],
             [
-                FooModal::RULE_SANITIZE, 'username', 'customFilter' => ['.']
+                'username', 'customFilter' => ['.']
             ],
         ];
         $model->setAttributes(['username' => 'Tom   ', 'email' => ' <b>ToM@site.com</b>   ', 'password' => 'qwerty']);
@@ -100,26 +100,26 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_SANITIZE, ['email', 'username'], 'trim'
+                ['email', 'username'], 'trim'
             ],
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required', 'customValidate'
+                ['email', 'username'], 'required', 'customValidate'
             ],
             [
-                FooModal::RULE_VALIDATE, 'email', 'length' => [20, 80, true], 'email'
+                'email', 'length' => [20, 80, true], 'email'
             ],
             [
-                FooModal::RULE_VALIDATE, 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
+                'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
                 'placeholders' => ['name' => 'foo']
             ],
             [
-                FooModal::RULE_VALIDATE, 'age', 'int', 'messages' => ['int' => 'error']
+                'age', 'int', 'messages' => ['int' => 'error']
             ],
             [
-                FooModal::RULE_SANITIZE, 'email', 'mb_strtolower' => ['utf-8']
+                'email', '!lowercase'
             ],
             [
-                FooModal::RULE_SANITIZE, 'username', 'customFilter' => ['.']
+                'username', 'customFilter' => ['.']
             ],
         ];
         $model->setAttributes(['username' => 'T(o)m   ', 'email' => ' ToM@site.com   ', 'password' => 'qwerty']);
@@ -127,8 +127,8 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $expected = [
             'email' =>
                 [
-                    0 => 'e-mail must be valid',
-                    1 => 'e-mail must have a length between 20 and 80',
+                   'e-mail must be valid',
+                   'e-mail must have a length between 20 and 80',
                 ],
             'username' =>
                 [
@@ -138,7 +138,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 ],
             'age' =>
                 [
-                    0 => 'error',
+                   'error',
                 ],
         ];
         $this->assertSame($expected, $model->getErrors());
@@ -156,23 +156,23 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_SANITIZE, ['email', 'username'], 'trim'
+                ['email', 'username'], 'trim'
             ],
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required', 'customValidate'
+                ['email', 'username'], 'required', 'customValidate'
             ],
             [
-                FooModal::RULE_VALIDATE, 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
+                'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
                 'placeholders' => ['name' => 'foo']
             ],
             [
-                FooModal::RULE_VALIDATE, 'age', 'int', 'messages' => ['int' => 'error']
+                'age', 'int', 'messages' => ['int' => 'error']
             ],
             [
-                FooModal::RULE_SANITIZE, 'email', 'mb_strtolower' => ['utf-8']
+                'email', 'lowercase'
             ],
             [
-                FooModal::RULE_SANITIZE, 'username', 'customFilter' => ['.']
+                'username', 'customFilter' => ['.']
             ],
         ];
         $model->setAttributes(['username' => '', 'email' => '', 'password' => '', 'age' => '']);
@@ -180,11 +180,11 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $expected = [
             'email' =>
                 [
-                    0 => 'e-mail must not be empty',
+                    'e-mail must not be empty',
                 ],
             'username' =>
                 [
-                    0 => 'username must not be empty',
+                    'username must not be empty',
                 ],
             'age' => ['error']
         ];
@@ -203,7 +203,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, ['age'], 'customValidate', 'length' => [6, 20],
+                ['age'], 'customValidate', 'length' => [6, 20],
                 'messages' => ['length' => 'error length']
             ],
         ];
@@ -227,7 +227,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_SANITIZE, 'email', 'mb_strtolower' => 'exception'
+                'email', '!lowercase' => 'exception'
             ],
         ];
         $model->setAttributes(['username' => 'Tom   ', 'email' => ' ToM@site.com   ', 'password' => 'qwerty']);
@@ -237,27 +237,12 @@ class ModelTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \rock\components\ModelException
      */
-    public function testValidateThrowExceptionArgumentsMustBeArray()
+    public function testThrowExceptionUnknownRule()
     {
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, 'email', 'is_int' => 'exception'
-            ],
-        ];
-        $model->setAttributes(['username' => 'Tom   ', 'email' => ' ToM@site.com   ', 'password' => 'qwerty']);
-        $model->validate();
-    }
-
-    /**
-     * @expectedException \rock\components\ModelException
-     */
-    public function testThrowExceptionUnknownTypeRule()
-    {
-        $model = new FooModal();
-        $model->rules = [
-            [
-                'unknown', 'email', 'is_int' => 'exception'
+                'email', 'is_int'
             ],
         ];
         $model->setAttributes(['username' => 'Tom   ', 'email' => ' ToM@site.com   ', 'password' => 'qwerty']);
@@ -269,10 +254,10 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required', 'customValidate', 'scenarios' => ['baz']
+                ['email', 'username'], 'required', 'customValidate', 'scenarios' => ['baz']
             ],
             [
-                FooModal::RULE_VALIDATE, 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
+                'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
                 'placeholders' => ['name' => 'foo'] , 'scenarios' => 'bar'
             ],
 
@@ -292,10 +277,10 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required', 'customValidate', 'scenarios' => 'baz'
+                ['email', 'username'], 'required', 'customValidate', 'scenarios' => 'baz'
             ],
             [
-                FooModal::RULE_VALIDATE, 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
+                'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
                 'placeholders' => ['name' => 'foo'] , 'scenarios' => 'bar'
             ],
 
@@ -317,10 +302,10 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, ['email', 'username','age'], 'required', 'one'
+                ['email', 'username','age'], 'required', 'one'
             ],
             [
-                FooModal::RULE_VALIDATE, 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i']
+                'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i']
             ],
 
         ];
@@ -329,7 +314,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $expected = [
             'email' =>
                 [
-                    0 => 'e-mail must not be empty',
+                    'e-mail must not be empty',
                 ],
         ];
         $this->assertSame($expected, $model->getErrors());
@@ -340,10 +325,10 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, ['email', 'username','age'], 'required', 'one' => 'email'
+                ['email', 'username','age'], 'required', 'one' => 'email'
             ],
             [
-                FooModal::RULE_VALIDATE, 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i']
+                'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i']
             ],
 
         ];
@@ -352,7 +337,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $expected = [
             'email' =>
                 [
-                    0 => 'e-mail must not be empty',
+                    'e-mail must not be empty',
                 ],
         ];
         $this->assertSame($expected, $model->getErrors());
@@ -364,7 +349,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function($attributeName, $input) use($model){
+                ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function($attributeName, $input) use($model){
                 if (!preg_match('/^[a-z\\d\-\_\.]+$/i',$input)) {
                     $model->addError($attributeName, 'err');
                     return false;
@@ -392,16 +377,16 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_SANITIZE, ['email', 'username', 'age'], 'trim'
+                ['email', 'username', 'age'], 'trim'
             ],
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required'
+                ['email', 'username'], 'required'
             ],
             [
-                FooModal::RULE_SANITIZE, 'email', 'mb_strtolower' => ['utf-8'], 'removeTags'
+                'email', 'mb_strtolower' => ['utf-8'], 'removeTags'
             ],
             [
-                FooModal::RULE_SANITIZE, 'username', 'customFilter' => ['.']
+                'username', 'customFilter' => ['.']
             ],
         ];
         $model->setAttributes(['username' => 'Tom   ', 'email' => ' <b>ToM@site.com</b>   ', 'password' => 'qwerty']);
@@ -541,7 +526,9 @@ class FooModal extends Model
 
     public function customFilter($attributeName, $input = '', $punctuation = '')
     {
-        $this->$attributeName = $input . $punctuation;
+        if (!$this->hasErrors()) {
+            $this->$attributeName = $input . $punctuation;
+        }
     }
 
     public function customValidate($attributeName, $input = '')

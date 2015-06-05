@@ -1,10 +1,7 @@
 <?php
 namespace rock\components;
 
-use rock\components\sanitize\ModelSanitize;
-use rock\components\validate\ModelValidate;
 use rock\helpers\Inflector;
-use rock\helpers\Instance;
 use rock\sanitize\Sanitize;
 use rock\validate\Validate;
 
@@ -47,8 +44,6 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
 
     use ArrayableTrait;
 
-    const RULE_VALIDATE = 1;
-    const RULE_SANITIZE = 2;
     /**
      * The name of the default scenario.
      */
@@ -127,13 +122,13 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      * ```php
      * [
      *  // built-in "required" validator
-     *  [Model::RULE_VALIDATE, ['username', 'password'], 'required'],
+     *  [['username', 'password'], 'required'],
      *  // built-in "string" validator customized with "min" and "max" properties
-     *  [Model::RULE_VALIDATE, 'username', 'string', 'min' => [3], 'max' => [12]],
+     *  ['username', 'string', 'min' => [3], 'max' => [12]],
      *  // built-in "compare" validator that is used in "register" scenario only
-     *  [Model::RULE_VALIDATE, 'password', 'confirm' => [$this->password], 'scenarios' => ['signup']],
+     *  ['password', 'confirm' => [$this->password], 'scenarios' => ['signup']],
      *  // an inline validator defined via the "authenticate()" method in the model class
-     *  [Model::RULE_VALIDATE, 'password', 'authenticate', 'scenarios' => ['login']],
+     *  ['password', 'authenticate', 'scenarios' => ['login']],
      * ];
      * ```
      *
@@ -260,29 +255,55 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      * Errors found during the validation can be retrieved via {@see \rock\components\Model::getErrors()}, {@see \rock\components\Model::getFirstErrors()}
      * and {@see \rock\components\Model::getFirstError()}.
      *
-     * @param array $attributes list of attributes that should be validated.
-     *                          If this parameter is empty, it means any attribute listed in the applicable
-     *                          validation rules should be validated.
+     * @param array $attributeNames list of attribute names that should be validated.
+     * If this parameter is empty, it means any attribute listed in the applicable
+     * validation rules should be validated.
      * @param bool $clearErrors whether to call {@see \rock\components\Model::clearErrors()} before performing validation
      * @return bool whether the validation is successful without any error.
+     * @throws ModelException
      */
-    public function validate(array $attributes = null, $clearErrors = true)
+    public function validate(array $attributeNames = [], $clearErrors = true)
     {
         if ($clearErrors) {
             $this->clearErrors();
         }
-        if ($attributes === null) {
-            $attributes = $this->getAttributes();
+        if (empty($attributeNames)) {
+            $attributeNames = $this->attributes();
         }
 
         if (!$this->beforeValidate()) {
             return false;
         }
-        if ($this->_rulesInternal($attributes) === false) {
-            //Event::offClass($this);
-            //$this->detachEvents();
+        if (!class_exists('\rock\validate\Validate')) {
+            throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Validate']);
+        }
+        if (!class_exists('\rock\sanitize\Sanitize')) {
+            throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Sanitize']);
+        }
+
+        $config = [
+            'model' => $this,
+            'validate' => $this->validate,
+            'sanitize' => $this->sanitize,
+            'useLabelsAsPlaceholders' => $this->useLabelsAsPlaceholders
+        ];
+        $validate = new ValidateAttributes($config);
+
+        foreach($this->getActiveRules() as $rules){
+            $attributes = array_shift($rules);
+            if (is_string($attributes)) {
+                $attributes = [$attributes];
+            }
+            $attributes = array_intersect($attributes, $attributeNames);
+            if (!$validate->validate($attributes, $rules)) {
+                break;
+            }
+        }
+
+        if ($this->hasErrors()) {
             return false;
         }
+
         $this->afterValidate();
         return true;
     }
@@ -310,7 +331,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 unset($rule['scenarios']);
             }
 
-            if ($attribute === null || in_array($attribute, (array)$rule[1], true)) {
+            if ($attribute === null || in_array($attribute, (array)$rule[0], true)) {
                 $rules[] = $rule;
             }
         }
@@ -859,174 +880,4 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     {
         $this->$offset = null;
     }
-
-    private function _rulesInternal(array $attributes)
-    {
-        foreach($this->getActiveRules() as $rule){
-            $type = array_shift($rule);
-            if ($type !== self::RULE_SANITIZE && $type !== self::RULE_VALIDATE) {
-                throw new ModelException("Unknown type of rule: {$type}");
-            }
-            $attributeNames = array_shift($rule);
-            if (is_string($attributeNames)) {
-                $attributeNames = [$attributeNames];
-            }
-            if ($type === self::RULE_SANITIZE) {
-                if (!$this->hasErrors()) {
-                    $this->_filterInternal($attributeNames, $rule);
-                }
-                continue;
-            }
-
-            if ($type === self::RULE_VALIDATE) {
-                if (!$this->_validateInternal($attributeNames, $rule)) {
-                    break;
-                }
-                continue;
-            }
-        }
-
-        if ($this->hasErrors()) {
-            return false;
-        }
-
-        //$this->setAttributes(array_filter($attributes, function($value){return isset($value);}));
-        return true;
-    }
-
-    private function _filterInternal(array $attributeNames, array $rules)
-    {
-        foreach ($attributeNames as $name) {
-//            if (!isset($this->$name)) {
-//                $this->$name = null;
-//            }
-
-            foreach ($rules as $key => $rule) {
-                $args = [];
-                if (is_string($key)) {
-                    if (!is_array($rule)) {
-                        throw new ModelException('Arguments must be `array`');
-                    }
-                    $args = $rule;
-                    $rule = $key;
-                }
-
-                // closure
-                if ($rule instanceof \Closure) {
-                    array_unshift($args, $name, $this->$name);
-                    call_user_func_array($rule, $args);
-                    continue;
-                }
-
-                // method
-                if (method_exists($this, $rule)) {
-                    array_unshift($args, $name, $this->$name);
-                    call_user_func_array([$this, $rule], $args);
-                    continue;
-                }
-
-                if (!class_exists('\rock\sanitize\Sanitize')) {
-                    throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Sanitize']);
-                }
-                /** @var ModelSanitize $sanitize */
-                $sanitize = Instance::ensure($this->sanitize, ModelSanitize::className());
-                if ($sanitize instanceof ModelSanitize) {
-                    $sanitize->model = $this;
-                    $sanitize->attribute = $name;
-                }
-
-                $this->$name = call_user_func_array([$sanitize, $rule], $args)->sanitize($this->$name);
-            }
-        }
-    }
-
-    private function _validateInternal(array $attributeNames, array $rules)
-    {
-        $messages = [];
-        $errors = $this->errors;
-        if (isset($rules['messages'])) {
-            $messages = $rules['messages'];
-        }
-        foreach ($attributeNames as $name) {
-//            if (!isset($this->$name)) {
-//                $this->$name = null;
-//            }
-            $placeholders = [];
-            if (isset($rules['placeholders'])) {
-                $placeholders = $rules['placeholders'];
-            }
-            if ($this->useLabelsAsPlaceholders && !isset($placeholders['name'])) {
-                if (($label = $this->attributeLabels()) && isset($label[$name])) {
-                    $placeholders['name'] = $label[$name];
-                }
-            }
-            foreach ($rules as $key => $ruleName) {
-                if ($key === 'placeholders' || $key === 'messages' || $key === 'one' || $key === 'when') {
-                    continue;
-                }
-                if ($ruleName === 'one') {
-                    $rules[$ruleName] = 0;
-                    continue;
-                }
-                $args = [];
-                if (is_string($key)) {
-                    if (!is_array($ruleName)) {
-                        throw new ModelException('Arguments must be `array`');
-                    }
-                    $args = $ruleName;
-                    $ruleName = $key;
-                }
-
-                // closure
-                if ($ruleName instanceof \Closure) {
-                    array_unshift($args, $name, $this->$name);
-                    call_user_func_array($ruleName, $args);
-                    continue;
-                }
-
-                // method
-                if (method_exists($this, $ruleName)) {
-                    array_unshift($args, $name, $this->$name);
-                    call_user_func_array([$this, $ruleName], $args);
-                    continue;
-                }
-
-                if (!class_exists('\rock\validate\Validate')) {
-                    throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Validate']);
-                }
-                /** @var ModelValidate $validate */
-                $validate = Instance::ensure($this->validate, ModelValidate::className());
-                if ($validate instanceof ModelValidate) {
-                    $validate->model = $this;
-                    $validate->attribute = $name;
-                }
-
-                // rule
-                if ($placeholders) {
-                    $validate->placeholders($placeholders);
-                }
-                if ($messages) {
-                    $validate->messages($messages);
-                }
-                $validate = call_user_func_array([$validate, $ruleName], $args);
-                if (!$validate->validate($this->$name)) {
-                    $this->addError($name, $validate->getFirstError());
-                }
-
-            }
-            if (isset($rules['one'])) {
-                if ((is_int($rules['one']) || $rules['one'] === $name) && $errors !== $this->errors) {
-                    return false;
-                }
-            }
-        }
-
-        if (isset($rules['when']) && $errors === $this->errors) {
-            return $this->_validateInternal($attributeNames, $rules['when']);
-        }
-        return true;
-    }
-
-
-
 }
