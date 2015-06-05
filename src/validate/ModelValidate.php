@@ -9,10 +9,8 @@ use rock\validate\Validate;
 /**
  * Model validate.
  *
- * @method static Validate unique(Model $m, $targetAttribute = null, $targetClass = null, $filter = null)
- * @method static Validate mongoId(Model $m)
- *
- * @package rock\validate
+ * @method static Validate unique($targetAttribute = null, $targetClass = null, $filter = null)
+ * @method static Validate mongoId()
  */
 class ModelValidate extends Validate
 {

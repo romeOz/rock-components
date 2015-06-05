@@ -10,8 +10,6 @@ use rock\sanitize\Sanitize;
  * Model sanitize.
  *
  * @method static Sanitize mongoId()
- *
- * @package rock\validate
  */
 class ModelSanitize extends Sanitize
 {
