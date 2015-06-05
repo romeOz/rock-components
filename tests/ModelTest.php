@@ -78,7 +78,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 FooModal::RULE_VALIDATE, ['email', 'username'], 'required'
             ],
             [
-                FooModal::RULE_SANITIZE, 'email', 'mb_strtolower' => ['utf8'], 'removeTags'
+                FooModal::RULE_SANITIZE, 'email', 'lowercase', 'removeTags'
             ],
             [
                 FooModal::RULE_SANITIZE, 'username', 'customFilter' => ['.']
@@ -113,7 +113,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 'placeholders' => ['name' => 'foo']
             ],
             [
-                FooModal::RULE_VALIDATE, 'age', 'is_int', 'messages' => ['is_int' => 'error']
+                FooModal::RULE_VALIDATE, 'age', 'int', 'messages' => ['int' => 'error']
             ],
             [
                 FooModal::RULE_SANITIZE, 'email', 'mb_strtolower' => ['utf-8']
@@ -166,7 +166,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 'placeholders' => ['name' => 'foo']
             ],
             [
-                FooModal::RULE_VALIDATE, 'age', 'is_int', 'messages' => ['is_int' => 'error']
+                FooModal::RULE_VALIDATE, 'age', 'int', 'messages' => ['int' => 'error']
             ],
             [
                 FooModal::RULE_SANITIZE, 'email', 'mb_strtolower' => ['utf-8']
@@ -186,6 +186,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 [
                     0 => 'username must not be empty',
                 ],
+            'age' => ['error']
         ];
         $this->assertSame($expected, $model->getErrors());
         $expected = [
@@ -363,7 +364,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                FooModal::RULE_VALIDATE, ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function($input, $attributeName) use($model){
+                FooModal::RULE_VALIDATE, ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function($attributeName, $input) use($model){
                 if (!preg_match('/^[a-z\\d\-\_\.]+$/i',$input)) {
                     $model->addError($attributeName, 'err');
                     return false;
@@ -538,12 +539,12 @@ class FooModal extends Model
     }
 
 
-    public function customFilter($input = '', $punctuation = '')
+    public function customFilter($attributeName, $input = '', $punctuation = '')
     {
-        return $input . $punctuation;
+        $this->$attributeName = $input . $punctuation;
     }
 
-    public function customValidate($input = '', $attributeName)
+    public function customValidate($attributeName, $input = '')
     {
         if ($input === '') {
             return true;

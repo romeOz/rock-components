@@ -5,7 +5,6 @@ use rock\components\sanitize\ModelSanitize;
 use rock\components\validate\ModelValidate;
 use rock\helpers\Inflector;
 use rock\helpers\Instance;
-use rock\helpers\StringHelper;
 use rock\sanitize\Sanitize;
 use rock\validate\Validate;
 
@@ -873,15 +872,14 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 $attributeNames = [$attributeNames];
             }
             if ($type === self::RULE_SANITIZE) {
-                $attributes = $this->_filterInternal($attributeNames, $attributes, $rule);
                 if (!$this->hasErrors()) {
-                    $this->setAttributes($attributes);
+                    $this->_filterInternal($attributeNames, $rule);
                 }
                 continue;
             }
 
             if ($type === self::RULE_VALIDATE) {
-                if (!$this->_validateInternal($attributeNames, $attributes, $rule)) {
+                if (!$this->_validateInternal($attributeNames, $rule)) {
                     break;
                 }
                 continue;
@@ -892,16 +890,16 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
             return false;
         }
 
-        $this->setAttributes(array_filter($attributes, function($value){return isset($value);}));
+        //$this->setAttributes(array_filter($attributes, function($value){return isset($value);}));
         return true;
     }
 
-    private function _filterInternal(array $attributeNames, array $attributes, array $rules)
+    private function _filterInternal(array $attributeNames, array $rules)
     {
         foreach ($attributeNames as $name) {
-            if (!isset($attributes[$name])) {
-                $attributes[$name] = null;
-            }
+//            if (!isset($this->$name)) {
+//                $this->$name = null;
+//            }
 
             foreach ($rules as $key => $rule) {
                 $args = [];
@@ -912,19 +910,21 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     $args = $rule;
                     $rule = $key;
                 }
+
                 // closure
                 if ($rule instanceof \Closure) {
-                    array_unshift($args, $attributes[$name]);
-                    $attributes[$name] = call_user_func_array($rule, $args);
+                    array_unshift($args, $name, $this->$name);
+                    call_user_func_array($rule, $args);
                     continue;
                 }
 
                 // method
                 if (method_exists($this, $rule)) {
-                    array_unshift($args, $attributes[$name]);
-                    $attributes[$name] = call_user_func_array([$this, $rule], $args);
+                    array_unshift($args, $name, $this->$name);
+                    call_user_func_array([$this, $rule], $args);
                     continue;
                 }
+
                 if (!class_exists('\rock\sanitize\Sanitize')) {
                     throw new ModelException(ModelException::NOT_INSTALL_LIBRARY, ['name' => 'Rock Sanitize']);
                 }
@@ -935,30 +935,22 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     $sanitize->attribute = $name;
                 }
 
-                // function
-                if (function_exists($rule) && !$sanitize->existsRule($rule)) {
-                    array_unshift($args, $attributes[$name]);
-                    $attributes[$name] = call_user_func_array($rule, $args);
-                    continue;
-                }
-
-                $attributes[$name] = call_user_func_array([$sanitize, $rule], $args)->sanitize($attributes[$name]);
+                $this->$name = call_user_func_array([$sanitize, $rule], $args)->sanitize($this->$name);
             }
         }
-        return $attributes;
     }
 
-    private function _validateInternal(array $attributeNames, array $attributes, array $rules)
+    private function _validateInternal(array $attributeNames, array $rules)
     {
         $messages = [];
-        $valid = true;
+        $errors = $this->errors;
         if (isset($rules['messages'])) {
             $messages = $rules['messages'];
         }
         foreach ($attributeNames as $name) {
-            if (!isset($attributes[$name])) {
-                $attributes[$name] = null;
-            }
+//            if (!isset($this->$name)) {
+//                $this->$name = null;
+//            }
             $placeholders = [];
             if (isset($rules['placeholders'])) {
                 $placeholders = $rules['placeholders'];
@@ -985,19 +977,17 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     $ruleName = $key;
                 }
 
-                // callable
+                // closure
                 if ($ruleName instanceof \Closure) {
-                    if (!$this->_validateAsCallable($name, $attributes[$name], $ruleName, $args)) {
-                        $valid = false;
-                    }
+                    array_unshift($args, $name, $this->$name);
+                    call_user_func_array($ruleName, $args);
                     continue;
                 }
 
                 // method
-                if (method_exists($this, $ruleName) || $ruleName instanceof \Closure) {
-                    if (!$this->_validateAsMethod($name, $attributes[$name], $ruleName, $args)) {
-                        $valid = false;
-                    }
+                if (method_exists($this, $ruleName)) {
+                    array_unshift($args, $name, $this->$name);
+                    call_user_func_array([$this, $ruleName], $args);
                     continue;
                 }
 
@@ -1011,23 +1001,6 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                     $validate->attribute = $name;
                 }
 
-                // function
-                if (function_exists($ruleName) && !$validate->existsRule($ruleName)) {
-                    if ($attributes[$name] === '') {
-                        continue;
-                    }
-                    if (!isset($placeholders['name'])) {
-                        $placeholders['name'] = 'value';
-                    }
-                    $message = isset($messages[$ruleName])
-                        ? $messages[$ruleName]
-                        : StringHelper::replace('{{name}} must be valid', $placeholders);
-                    if (!$this->_validateAsFunction($name, $attributes[$name], $ruleName, $args, $message)) {
-                        $valid = false;
-                    }
-                    continue;
-                }
-
                 // rule
                 if ($placeholders) {
                     $validate->placeholders($placeholders);
@@ -1035,64 +1008,25 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
                 if ($messages) {
                     $validate->messages($messages);
                 }
-                if (!$this->_validateAsRule($validate, $name, $attributes[$name], $ruleName,$args)) {
-                    $valid = false;
+                $validate = call_user_func_array([$validate, $ruleName], $args);
+                if (!$validate->validate($this->$name)) {
+                    $this->addError($name, $validate->getFirstError());
                 }
 
             }
             if (isset($rules['one'])) {
-                if ((is_int($rules['one']) || $rules['one'] === $name) && !$valid) {
+                if ((is_int($rules['one']) || $rules['one'] === $name) && $errors !== $this->errors) {
                     return false;
                 }
             }
         }
 
-        if (isset($rules['when']) && $valid === true) {
-            return $this->_validateInternal($attributeNames, $attributes, $rules['when']);
+        if (isset($rules['when']) && $errors === $this->errors) {
+            return $this->_validateInternal($attributeNames, $rules['when']);
         }
         return true;
     }
 
-    private function _validateAsCallable($name, $value, $ruleName, $args)
-    {
-        array_unshift($args, $value, $name, $this);
-        if (!call_user_func_array($ruleName, $args)) {
-            //$valid = false;
-            return false;
-        }
 
-        return true;
-    }
 
-    private function _validateAsMethod($name, $value, $ruleName, $args)
-    {
-        array_unshift($args, $value, $name, $this);
-        $fx = method_exists($this, $ruleName) ? [$this, $ruleName] : $ruleName;
-        if (!call_user_func_array($fx, $args)) {
-            return false;
-        }
-        return true;
-    }
-
-    private function _validateAsFunction($name, $value, $ruleName, $args, $message)
-    {
-        array_unshift($args, $value);
-        if (!call_user_func_array($ruleName, $args)) {
-            $this->addError($name, $message);
-            return false;
-        }
-
-        return true;
-    }
-
-    private function _validateAsRule(ModelValidate $validate, $name, $value, $ruleName, $args)
-    {
-        /** @var ModelValidate $validate */
-        $validate = call_user_func_array([$validate, $ruleName], $args);
-        if (!$validate->validate($value)) {
-            $this->addError($name, $validate->getFirstError());
-            return false;
-        }
-        return true;
-    }
 }
