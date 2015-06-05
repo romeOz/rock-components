@@ -4,6 +4,7 @@ namespace rockunit;
 use rock\base\ObjectInterface;
 use rock\base\ObjectTrait;
 use rock\components\Model;
+use rock\components\validate\ModelValidate;
 use rockunit\data\Singer;
 use rockunit\data\Speaker;
 
@@ -94,6 +95,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         ];
         $this->assertSame($expected, $model->getAttributes([], ['rules']));
     }
+
 
     public function testValidate()
     {
@@ -507,6 +509,13 @@ class FooModal extends Model
     public $email;
     public $age;
     public $password;
+
+    public function init()
+    {
+        parent::init();
+        $this->validate = new ModelValidate();
+    }
+
 
     public function rules()
     {

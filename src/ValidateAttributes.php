@@ -80,9 +80,9 @@ class ValidateAttributes
                 }
 
                 /** @var ModelValidate $validate */
-                $validate = Instance::ensure($this->validate, ModelValidate::className());
+                $validate = clone Instance::ensure($this->validate, ModelValidate::className());
                 /** @var ModelSanitize $sanitize */
-                $sanitize = Instance::ensure($this->sanitize, ModelSanitize::className());
+                $sanitize = clone Instance::ensure($this->sanitize, ModelSanitize::className());
 
                 if (!$validate->existsRule($ruleName) && !$sanitize->existsRule($ruleName)) {
                     throw new ModelException("Unknown rule: {$ruleName}");
