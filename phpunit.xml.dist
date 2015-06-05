@@ -28,8 +28,10 @@
             <file>./src/ComponentsTrait.php</file>
             <file>./src/ModelEvent.php</file>
             <file>./src/Linkable.php</file>
-            <file>./src/ModelValidate.php</file>
-            <file>./src/ModelSanitize.php</file>
+            <file>./src/validate/ModelValidate.php</file>
+            <file>./src/validate/ModelRule.php</file>
+            <file>./src/sanitize/ModelSanitize.php</file>
+            <file>./src/sanitize/ModelRule.php</file>
         </blacklist>
     </filter>
     <logging>
