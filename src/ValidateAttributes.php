@@ -90,7 +90,7 @@ class ValidateAttributes
 
                 if (!$onlySanitize && $validate->existsRule($ruleName)) {
                     if ($validate instanceof ModelValidate) {
-                        $validate->model = $this;
+                        $validate->model = $this->model;
                         $validate->attribute = $name;
                     }
 
@@ -113,7 +113,7 @@ class ValidateAttributes
 
                 if ($sanitize->existsRule($ruleName)) {
                     if ($sanitize instanceof ModelSanitize) {
-                        $sanitize->model = $this;
+                        $sanitize->model = $this->model;
                         $sanitize->attribute = $name;
                     }
 
