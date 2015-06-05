@@ -262,7 +262,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      * @return bool whether the validation is successful without any error.
      * @throws ModelException
      */
-    public function validate(array $attributeNames = [], $clearErrors = true)
+    public function validate(array $attributeNames = null, $clearErrors = true)
     {
         if ($clearErrors) {
             $this->clearErrors();
