@@ -34,4 +34,29 @@ class ModelValidate extends Validate
         }
         return $rule;
     }
+
+    protected function defaultRules()
+    {
+        $rules = [];
+        if (class_exists('\rock\mongodb\validate\rules\MongoIdRule')) {
+            $rules['mongoId'] = [
+                'class' => \rock\mongodb\validate\rules\MongoIdRule::className(),
+                'locales' => [
+                    'en' => \rock\mongodb\validate\locale\en\MongoIdLocale::className(),
+                    'ru' => \rock\mongodb\validate\locale\ru\MongoIdLocale::className(),
+                ]
+            ];
+        }
+
+        if (class_exists('\rock\db\validate\rules\Unique')){
+            $rules['unique'] =  [
+                'class' => \rock\db\validate\rules\Unique::className(),
+                'locales' => [
+                    'en' => \rock\db\validate\locale\en\Unique::className(),
+                    'ru' => \rock\db\validate\locale\ru\Unique::className(),
+                ]
+            ];
+        }
+        return $rules + parent::defaultRules();
+    }
 }

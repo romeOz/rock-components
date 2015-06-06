@@ -33,4 +33,13 @@ class ModelSanitize extends Sanitize
         }
         return $rule;
     }
+
+    protected function defaultRules()
+    {
+        $rules = [];
+        if (class_exists('\rock\mongodb\sanitize\rules\MongoIdRule')) {
+            $rules['mongoId'] = \rock\mongodb\sanitize\rules\MongoIdRule::className();
+        }
+        return $rules + parent::defaultRules();
+    }
 }
