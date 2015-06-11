@@ -351,7 +351,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function($attributeName, $input) use($model){
+                ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function($input, $attributeName) use($model){
                 if (!preg_match('/^[a-z\\d\-\_\.]+$/i',$input)) {
                     $model->addError($attributeName, 'err');
                     return false;
@@ -533,14 +533,14 @@ class FooModal extends Model
     }
 
 
-    public function customFilter($attributeName, $input = '', $punctuation = '')
+    public function customFilter($input = '', $attributeName, $punctuation = '')
     {
         if (!$this->hasErrors()) {
             $this->$attributeName = $input . $punctuation;
         }
     }
 
-    public function customValidate($attributeName, $input = '')
+    public function customValidate($input = '', $attributeName)
     {
         if ($input === '') {
             return true;

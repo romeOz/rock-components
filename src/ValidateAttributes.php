@@ -63,14 +63,14 @@ class ValidateAttributes
 
                 // closure
                 if ($ruleName instanceof \Closure) {
-                    array_unshift($args, $name, $this->model->$name);
+                    array_unshift($args, $this->model->$name, $name);
                     call_user_func_array(\Closure::bind($ruleName, $this->model), $args);
                     continue;
                 }
 
                 // method
                 if (method_exists($this->model, $ruleName)) {
-                    array_unshift($args, $name, $this->model->$name);
+                    array_unshift($args, $this->model->$name, $name);
                     call_user_func_array([$this->model, $ruleName], $args);
                     continue;
                 }
