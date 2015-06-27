@@ -111,7 +111,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 'email', 'length' => [20, 80, true], 'email'
             ],
             [
-                'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
+                'username', 'length' => function($modal){ $this->assertInstanceOf(FooModal::className(), $modal);return [6, 20];}, 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
                 'placeholders' => ['name' => 'foo']
             ],
             [

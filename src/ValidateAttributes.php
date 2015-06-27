@@ -52,6 +52,9 @@ class ValidateAttributes
                 }
                 $args = [];
                 if (is_string($key)) {
+                    if (is_callable($ruleName)) {
+                        $ruleName = call_user_func($ruleName, $this->model);
+                    }
                     if (!is_array($ruleName)) {
                         throw new ModelException('Arguments must be `array`');
                     }
