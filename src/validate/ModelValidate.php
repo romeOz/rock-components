@@ -48,8 +48,8 @@ class ModelValidate extends Validate
             ];
         }
 
-        if (class_exists('\rock\db\validate\rules\Unique')){
-            $rules['unique'] =  [
+        if (class_exists('\rock\db\validate\rules\Unique')) {
+            $rules['unique'] = [
                 'class' => \rock\db\validate\rules\Unique::className(),
                 'locales' => [
                     'en' => \rock\db\validate\locale\en\Unique::className(),

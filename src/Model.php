@@ -23,16 +23,16 @@ use rock\validate\Validate;
  *
  * You may directly use Model to store model data, or extend it with customization.
  *
- * @property array          $attributes  Attribute values (name => value).
- * @property array          $errors      An array of errors for all attributes. Empty array is returned if no error. The
+ * @property array $attributes  Attribute values (name => value).
+ * @property array $errors      An array of errors for all attributes. Empty array is returned if no error. The
  *          result is a two-dimensional array. See {@see \rock\components\Model::getErrors()} for detailed description. This property is read-only.
- * @property array          $firstErrors The first errors. An empty array will be returned if there is no error. This
+ * @property array $firstErrors The first errors. An empty array will be returned if there is no error. This
  *          property is read-only.
  * @property \ArrayIterator $iterator    An iterator for traversing the items in the list. This property is
  *          read-only.
- * @property string         $scenario    The scenario that this model is in.
+ * @property string $scenario    The scenario that this model is in.
  * Defaults to {@see \rock\components\Model::DEFAULT_SCENARIO} .
- * @property \ArrayObject   $validators  All the validators declared in the model. This property is read-only.
+ * @property \ArrayObject $validators  All the validators declared in the model. This property is read-only.
  *
  * @package models
  */
@@ -61,9 +61,9 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      */
     const EVENT_AFTER_VALIDATE = 'afterValidate';
 
-    /** @var Validate|array|string  */
+    /** @var Validate|array|string */
     protected $validate = 'validate';
-    /** @var Sanitize|array|string  */
+    /** @var Sanitize|array|string */
     protected $sanitize = 'sanitize';
     /**
      * @var string current scenario
@@ -175,6 +175,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     }
 
     protected $_attributeNames;
+
     /**
      * Returns the list of attribute names.
      * By default, this method returns all public non-static properties of the class.
@@ -289,7 +290,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
         ];
         $validate = new ValidateAttributes($config);
 
-        foreach($this->getActiveRules() as $rules){
+        foreach ($this->getActiveRules() as $rules) {
             $attributes = array_shift($rules);
             if (is_string($attributes)) {
                 $attributes = [$attributes];
@@ -423,6 +424,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     {
         return in_array($attribute, $this->safeAttributes(), true);
     }
+
     /**
      * Returns the text label for the specified attribute.
      *
@@ -468,7 +470,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     /**
      * Returns the errors for all attribute or a single attribute.
      *
-     * @param string   $attribute attribute name. Use null to retrieve errors for all attributes.
+     * @param string $attribute attribute name. Use null to retrieve errors for all attributes.
      * @property array An         array of errors for all attributes. Empty array is returned if no error.
      *                            The result is a two-dimensional array. See {@see \rock\components\Model::getErrors()} for detailed description.
      * @return array errors for all attributes or the specified attribute. Empty array is returned if no error.
@@ -540,7 +542,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      * Adds a new error to the specified attribute.
      *
      * @param string $attribute attribute name
-     * @param string $error     new error message
+     * @param string $error new error message
      */
     public function addError($attribute, $error = '')
     {
@@ -558,7 +560,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     {
         foreach ($items as $attribute => $errors) {
             if (is_array($errors)) {
-                foreach($errors as $error) {
+                foreach ($errors as $error) {
                     $this->addError($attribute, $error);
                 }
             } else {
@@ -599,7 +601,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
     /**
      * Returns attribute values.
      *
-     * @param array $only  list of attributes whose value needs to be returned.
+     * @param array $only list of attributes whose value needs to be returned.
      *                      Defaults to null, meaning all attributes listed in {@see \rock\components\Model::attributes()} will be returned.
      *                      If it is an array, only the attributes in the array will be returned.
      * @param array $exclude list of attributes whose value should NOT be returned.
@@ -861,7 +863,7 @@ class Model implements \IteratorAggregate, \ArrayAccess, Arrayable, ComponentsIn
      * It is implicitly called when you use something like `$model[$offset] = $item;`.
      *
      * @param integer $offset the offset to set element
-     * @param mixed   $item   the element value
+     * @param mixed $item the element value
      */
     public function offsetSet($offset, $item)
     {

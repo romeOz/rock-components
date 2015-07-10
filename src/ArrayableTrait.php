@@ -98,10 +98,10 @@ trait ArrayableTrait
      * If the model implements the [[Linkable]] interface, the resulting array will also have a `_link` element
      * which refers to a list of links as specified by the interface.
      *
-     * @param array $only        the fields being requested. If empty, all fields as specified
+     * @param array $only the fields being requested. If empty, all fields as specified
      *                           by {@see \rock\components\ArrayableTrait::fields()} will be returned.
-     * @param array   $exclude
-     * @param array   $expand    the additional fields being requested for exporting. Only fields declared
+     * @param array $exclude
+     * @param array $expand the additional fields being requested for exporting. Only fields declared
      *                           in {@see \rock\components\ArrayableTrait::extraFields()} will be considered.
      * @param boolean $recursive whether to recursively return array representation of embedded objects.
      * @return array the array representation of the object
@@ -126,7 +126,7 @@ trait ArrayableTrait
      * This method will check the requested fields against those declared in {@see \rock\components\ArrayableTrait::fields()}
      * and {@see \rock\components\ArrayableTrait::extraFields()} to determine which fields can be returned.
      *
-     * @param array $only   the fields being requested for exporting
+     * @param array $only the fields being requested for exporting
      * @param array $expand the additional fields being requested for exporting
      * @param array $exclude
      * @return array the list of fields to be exported. The array keys are the field names, and the array values

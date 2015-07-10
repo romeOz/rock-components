@@ -10,11 +10,11 @@ trait ComponentsTrait
 {
     use EventsTrait;
 
-    /** @var Behavior[]  */
+    /** @var Behavior[] */
     private $_behaviors;
 
     /**
-     * Get data behaviors
+     * Returns data behaviors.
      *
      * @return array
      */
@@ -373,6 +373,7 @@ trait ComponentsTrait
 
         return false;
     }
+
     /**
      * Returns a value indicating whether a property can be set.
      *

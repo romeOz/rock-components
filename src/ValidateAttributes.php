@@ -17,9 +17,9 @@ class ValidateAttributes
     /** @var  Model */
     public $model;
     public $useLabelsAsPlaceholders = true;
-    /** @var Validate|array|string  */
+    /** @var Validate|array|string */
     public $validate = 'validate';
-    /** @var Sanitize|array|string  */
+    /** @var Sanitize|array|string */
     public $sanitize = 'sanitize';
 
     public function validate(array $attributeNames, array $rules)

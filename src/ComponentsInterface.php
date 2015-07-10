@@ -8,7 +8,7 @@ use rock\events\EventsInterface;
 interface ComponentsInterface extends EventsInterface
 {
     /**
-     * Get data behaviors
+     * Returns data behaviors.
      *
      * @return array
      */
@@ -23,6 +23,7 @@ interface ComponentsInterface extends EventsInterface
     public function getBehavior($name);
 
     public function existsBehavior($name);
+
     /**
      * Returns all behaviors attached to this component.
      *

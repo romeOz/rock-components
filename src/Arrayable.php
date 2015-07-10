@@ -71,10 +71,11 @@ interface Arrayable
      * @see fields()
      */
     public function extraFields();
+
     /**
      * Returns the collection as a PHP array.
      *
-     * @param array $only  list of items whose value needs to be returned.
+     * @param array $only list of items whose value needs to be returned.
      * @param array $exclude list of items whose value should NOT be returned.
      * @return array the array representation of the collection.
      */

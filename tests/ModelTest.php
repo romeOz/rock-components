@@ -111,7 +111,10 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 'email', 'length' => [20, 80, true], 'email'
             ],
             [
-                'username', 'length' => function($modal){ $this->assertInstanceOf(FooModal::className(), $modal);return [6, 20];}, 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
+                'username', 'length' => function ($modal) {
+                $this->assertInstanceOf(FooModal::className(), $modal);
+                return [6, 20];
+            }, 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
                 'placeholders' => ['name' => 'foo']
             ],
             [
@@ -129,8 +132,8 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $expected = [
             'email' =>
                 [
-                   'e-mail must be valid',
-                   'e-mail must have a length between 20 and 80',
+                    'e-mail must be valid',
+                    'e-mail must have a length between 20 and 80',
                 ],
             'username' =>
                 [
@@ -140,7 +143,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
                 ],
             'age' =>
                 [
-                   'error',
+                    'error',
                 ],
         ];
         $this->assertSame($expected, $model->getErrors());
@@ -260,7 +263,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
             ],
             [
                 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
-                'placeholders' => ['name' => 'foo'] , 'scenarios' => 'bar'
+                'placeholders' => ['name' => 'foo'], 'scenarios' => 'bar'
             ],
 
         ];
@@ -283,7 +286,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
             ],
             [
                 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i'],
-                'placeholders' => ['name' => 'foo'] , 'scenarios' => 'bar'
+                'placeholders' => ['name' => 'foo'], 'scenarios' => 'bar'
             ],
 
         ];
@@ -304,7 +307,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                ['email', 'username','age'], 'required', 'one'
+                ['email', 'username', 'age'], 'required', 'one'
             ],
             [
                 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i']
@@ -327,7 +330,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                ['email', 'username','age'], 'required', 'one' => 'email'
+                ['email', 'username', 'age'], 'required', 'one' => 'email'
             ],
             [
                 'username', 'length' => [6, 20], 'regex' => ['/^[a-z\d\-\_\.]+$/i']
@@ -351,8 +354,8 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $model = new FooModal();
         $model->rules = [
             [
-                ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function($input, $attributeName) use($model){
-                if (!preg_match('/^[a-z\\d\-\_\.]+$/i',$input)) {
+                ['email', 'username'], 'required', 'when' => ['length' => [6, 20], function ($input, $attributeName) use ($model) {
+                if (!preg_match('/^[a-z\\d\-\_\.]+$/i', $input)) {
                     $model->addError($attributeName, 'err');
                     return false;
                 }
@@ -465,6 +468,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($speaker->getErrors());
         $this->assertFalse($speaker->hasErrors());
     }
+
     public function testAddErrors()
     {
         $singer = new Singer();
