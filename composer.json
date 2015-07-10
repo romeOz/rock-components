@@ -22,13 +22,13 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "romeoz/rock-helpers": "0.11.*",
-    "romeoz/rock-events": "0.10.*"
+    "romeoz/rock-helpers": "*@dev",
+    "romeoz/rock-events": "*@dev"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.7.0",
-    "romeoz/rock-sanitize": "0.10.*",
-    "romeoz/rock-validate": "0.10.*"
+    "romeoz/rock-sanitize": "*@dev",
+    "romeoz/rock-validate": "*@dev"
   },
   "autoload": {
     "psr-4": {
