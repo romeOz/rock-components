@@ -30,9 +30,6 @@ class ValidateAttributes
             $messages = $rules['messages'];
         }
         foreach ($attributeNames as $name) {
-//            if (!isset($this->model->$name)) {
-//                $this->model->$name = null;
-//            }
             $placeholders = [];
             if (isset($rules['placeholders'])) {
                 $placeholders = $rules['placeholders'];
