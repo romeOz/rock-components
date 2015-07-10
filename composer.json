@@ -1,38 +1,43 @@
 {
-    "name": "romeoz/rock-components",
-    "description": "Components module for Rock Framework",
-    "keywords": ["common", "components", "behaviors", "filters"],
-    "type": "library",
-    "license": "MIT",
-    "support": {
-        "email": "serggalka@gmail.com",
-        "issues": "https://github.com/romeOz/rock-components/issues",
-        "source": "https://github.com/romeOz/rock-components"
-    },
-    "authors": [
-        {
-            "name": "Ruslan",
-            "email": "serggalka@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.4.0",
-        "romeoz/rock-helpers" : "0.11.*",
-        "romeoz/rock-events" : "0.10.*"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "~4.7.0",
-        "romeoz/rock-sanitize" : "0.10.*",
-        "romeoz/rock-validate" : "0.10.*"
-    },
-    "autoload": {
-        "psr-4": {
-            "rock\\components\\": "src/"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "0.11-dev"
-        }
+  "name": "romeoz/rock-components",
+  "description": "Components module for Rock Framework",
+  "keywords": [
+    "common",
+    "components",
+    "behaviors",
+    "filters"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "support": {
+    "email": "serggalka@gmail.com",
+    "issues": "https://github.com/romeOz/rock-components/issues",
+    "source": "https://github.com/romeOz/rock-components"
+  },
+  "authors": [
+    {
+      "name": "Ruslan",
+      "email": "serggalka@gmail.com"
     }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "romeoz/rock-helpers": "0.11.*",
+    "romeoz/rock-events": "0.10.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.7.0",
+    "romeoz/rock-sanitize": "0.10.*",
+    "romeoz/rock-validate": "0.10.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "rock\\components\\": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.11-dev"
+    }
+  }
 }
