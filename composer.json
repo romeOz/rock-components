@@ -4,8 +4,7 @@
   "keywords": [
     "common",
     "components",
-    "behaviors",
-    "filters"
+    "behaviors"
   ],
   "type": "library",
   "license": "MIT",
