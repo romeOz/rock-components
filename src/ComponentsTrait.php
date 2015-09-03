@@ -4,6 +4,8 @@ namespace rock\components;
 use rock\base\BaseException;
 use rock\di\Container;
 use rock\events\EventsTrait;
+use rock\filters\FilterInterface;
+use rock\base\Responseble;
 use rock\helpers\Instance;
 
 trait ComponentsTrait
@@ -49,9 +51,12 @@ trait ComponentsTrait
     private function _attachBehaviorInternal($name, $behavior)
     {
         if (!($behavior instanceof Behavior)) {
-            /** @var Behavior $behavior */
             $behavior = Instance::ensure($behavior);
         }
+        if ($behavior instanceof FilterInterface && $this instanceof Responseble) {
+            $behavior->response = $this->response;
+        }
+        /** @var ComponentsInterface|static $this */
         if (is_int($name)) {
             $behavior->attach($this);
             $this->_behaviors[] = $behavior;
