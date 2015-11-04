@@ -50,12 +50,23 @@ trait ComponentsTrait
      */
     private function _attachBehaviorInternal($name, $behavior)
     {
-        if (!($behavior instanceof Behavior)) {
-            $behavior = Instance::ensure($behavior);
-        }
-        if ($behavior instanceof FilterInterface && $this instanceof Responseble) {
+        if (is_array($behavior)) {
+            if (isset($behavior['class'])) {
+                if (is_subclass_of($behavior['class'], '\rock\filters\FilterInterface')
+                    && $this instanceof Responseble) {
+                    $behavior['response'] = $this->response;
+                } elseif (is_subclass_of($behavior['class'], '\rock\request\Requestable')  && $this instanceof \rock\request\Requestable) {
+                    $behavior['request'] = $this->request;
+                }
+            }
+        } elseif ($behavior instanceof FilterInterface && $this instanceof Responseble) {
             $behavior->response = $this->response;
+        } elseif ($behavior instanceof \rock\request\Requestable && $this instanceof \rock\request\Requestable) {
+            $behavior->request = $this->request;
         }
+        /** @var Behavior $behavior */
+        $behavior = Instance::ensure($behavior);
+
         /** @var ComponentsInterface|static $this */
         if (is_int($name)) {
             $behavior->attach($this);
