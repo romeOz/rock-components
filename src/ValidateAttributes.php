@@ -117,10 +117,10 @@ class ValidateAttributes
 
         // rule
         if ($placeholders) {
-            $validate->placeholders($placeholders);
+            $validate->setPlaceholders($placeholders);
         }
         if ($messages) {
-            $validate->messages($messages);
+            $validate->setMessages($messages);
         }
         $validate = call_user_func_array([$validate, $ruleName], $args);
         if (!$validate->validate($this->model->$attributeName)) {
